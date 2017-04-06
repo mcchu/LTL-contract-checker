@@ -5,6 +5,8 @@ import os, sys, unittest
 from src.parser import Parser
 from src.contract import Contract
 from src.check import Check
+from src.check import Checks
+
 sys.path.append(os.path.join(os.getcwd(), os.path.pardir))
 
 class TestLibrary(unittest.TestCase):
@@ -55,3 +57,8 @@ class TestLibrary(unittest.TestCase):
         consistency.set_type('consistency')
         consistency.set_contracts([waiter, customer])
         self.assertEqual(consistency, checks['consistency'])
+
+    def test_checks(self):
+        """Runs the program and outputs status of the LTL statements"""
+        checks = Checks()
+        checks.run()
