@@ -51,13 +51,58 @@ class Checks(object):
 	def add_check(check):
 		self.checks.append(check)
 
+        ##----- MICHAEL ADDED CODE BELOW -----##
+	## my function is def compile(all_checks) where all_checks is a list of checks. Change if needed.
 	def compile(self):
-		# function to compile a .smv file from the list of checks 
-		#
-		# FOR MICHAEL TO COMPLETE
-		# 
-		return 'tests/waiter_customer_example.smv'
+                outfile = open('nusmv.smv', 'w')
+                outfile.write("MODULE main\n")
 
+                outfile.write("VAR\n")
+                for check in all_checks:
+                        for var in check.variables:
+                                var_char = var[:(var.find(":="))]
+                                outfile.write("\t" + var_char + ": boolean;\n")
+                        break      
+
+                outfile.write("ASSIGN\n")
+                for check in all_checks:
+                        for var in check.variables:
+                                idx = var.find(" :=")
+                                var_char = var[:idx]
+                                outfile.write("\tinit(" + var_char + ")" + var[idx:] + ";\n")
+                        break     
+
+                outfile.write("\n")
+
+                ##Compatibility Check
+                ctrct = []
+                for checks in all_checks:
+                        st = ""
+                        for x in range(len(checks.guarantees)):
+                                st += (checks.guarantees[x] + " & ")
+                        ctrct.append(st[:-3])
+
+                comp = compatibility(ctrct[0], ctrct[1])
+                ##Need to fix paranthesis
+                outfile.write(comp)
+
+                ##Consistency Check
+                const = consistency(ctrct[0], ctrct[1])
+                outfile.write(const)
+
+        ##Compatibility(contract1, contract2)
+        ##contract1 and contract2 are string objects
+        def compatibility(contract_a, contract_b):
+                comp = "\tLTLSPEC !( (TRUE & TRUE) | !((TRUE -> (" + contract_a + ") & (TRUE -> (" + contract_b + ")))) )\n"
+                return comp
+
+        ##Consistency(contract1, contract2)
+        def consistency(contract_a, contract_b):
+                cons = "\tLTLSPEC !( (TRUE -> (" + contract_a + ") & (TRUE -> (" + contract_b + "))) )\n"
+                return cons
+        
+        ##----- MICHAEL ADDED CODE ABOVE -----##
+        
 	def run(self):
 		# Return the name of the .smv file to run in terminal
 		file = self.compile()
@@ -80,3 +125,6 @@ class Checks(object):
 		# print output to console
 		pprint(self.output)
 		pprint(self.results)
+
+
+
