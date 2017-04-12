@@ -1,10 +1,10 @@
 MODULE main
 VAR
-	request: boolean;
-	service: boolean;
+	request : boolean;
+	service : boolean;
 ASSIGN
-	init(service) := FALSE;
 	init(request) := FALSE;
-	
+	init(service) := FALSE;
+
 	LTLSPEC !( (TRUE & TRUE) | !(( (TRUE) -> (G(!request -> X !service) & G(request -> X service)) ) & ( (TRUE) -> ((F request) & G((request & !service) -> X request) & G(service -> X !request)) )) );
 	LTLSPEC !(( (TRUE) -> (G(!request -> X !service) & G(request -> X service)) ) & ( (TRUE) -> ((F request) & G((request & !service) -> X request) & G(service -> X !request)) ));

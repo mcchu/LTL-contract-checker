@@ -60,5 +60,8 @@ class TestLibrary(unittest.TestCase):
 
 	def test_checks(self):
 		"""Runs the program and outputs status of the LTL statements"""
-		checks = Checks()
-		checks.run()
+
+		# parse waiter customer model
+		parser_obj = Parser('tests/waiter_customer.txt')
+		contracts, checks = parser_obj.parse()
+		checks.run(contracts)

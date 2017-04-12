@@ -3,6 +3,7 @@
 
 from src.contract import Contract
 from src.check import Check
+from src.check import Checks
 
 # contract file attributes
 TAB_WIDTH = 2
@@ -93,7 +94,7 @@ class Parser(object):
 
 	def __parse_checks(self, tab_lim, afile, contracts):
 		"""Parses the checks block within the input text file"""
-		checks = {}
+		checks = Checks()
 
 		# parse checks
 		for line in afile:
@@ -117,7 +118,7 @@ class Parser(object):
 				check = Check()
 				check.set_type(check_type.strip())
 				check.set_contracts(check_contracts)
-				checks[check.check_type] = check
+				checks.add_check(check)
 
 		return checks
 
