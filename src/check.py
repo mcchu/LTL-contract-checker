@@ -31,10 +31,7 @@ class Check(object):
 
     def __str__(self):
         """Override the print behavior"""
-        astr = 'Check: ' + self.check_type + '\n'
-        astr += 'Contracts:\n'
-        for contract in self.check_contracts:
-            astr += ('  ' + contract.name + '\n')
+        astr = ('\'' + self.contract_names[0] + '\'' + ' ' + self.check_type + ' with ' + '\'' + self.contract_names[1] + '\'' + '\n')
         return astr
 
     def __eq__(self, other):
@@ -53,6 +50,13 @@ class Checks(object):
 
     def add_check(self, check):
         self.checks.append(check)
+
+    def __str__(self):
+        """Override the print behavior"""        
+        astr = '\nCheck the following items:\n'
+        for check in self.checks:
+            astr += ('\'' + check.contract_names[0] + '\'' + ' ' + check.check_type + ' with ' + '\'' + check.contract_names[1] + '\'' + '\n')
+        return astr
 
     def compile(self, contracts):
         outfile = open('nusmv.smv', 'w')
@@ -82,7 +86,7 @@ class Checks(object):
         # Cleanup the Contracts to concatenate assumptions and guarantees and put into saturated form
         for k,v in contracts.items():
             v.cleanup_contract()
-            print "\n", v
+            # print "\n", v
 
         # Iterate through all checks and run the corresponding function for that test (for now, only works with 2 contracts)
         for check in self.checks:
@@ -102,7 +106,6 @@ class Checks(object):
         comp = "\tLTLSPEC !( (" + contract_a.assumptions + " & " + contract_b.assumptions + ") | !(" + contract_a.guarantees + " & " + contract_b.guarantees + ") );\n"
         return comp
 
-    ##Consistency(contract1, contract2)
     def consistency(self, contract_a, contract_b):
         """Returns the LTL expression that should be used to check the consistency of contracts a and b.
         contract_a and contract_b should both be contract objects"""
@@ -110,7 +113,9 @@ class Checks(object):
         return cons
         
     def run(self, contracts):
-        # Return the name of the .smv file to run in terminal
+        """runs the set of contracts and checks through NuSMV and parses the results to return to the user"""
+
+        # Use compile() to get the name of the .smv file to run in terminal
         file = self.compile(contracts)
 
         # Initialize an array to hold the results of the checks
@@ -118,19 +123,67 @@ class Checks(object):
 
         # create the command and run in terminal
         self.output = subprocess.check_output(['NuSMV', file]).splitlines()
+
+        # Get rid of all initial notes, warnings and blank lines
+        self.output = [x for x in self.output if not (x[:3] == '***' or x[:7] == 'WARNING' or x == '')]
+        # pprint(self.output)
+
+        # Iterate through all remaining lines of output, stopping at each "-- specification line to parse it"
+        result_num = -1      # Counter to keep track of what result you're looking at
+        in_result = False   # Flag to track if you're in a counterexample output
+        temp_counterexample = []
+        counterexamples = {}
+
+        for line in self.output:
+            # If this line is going to indicate whether or not a LTL spec is true/false
+            if line[:16] == '-- specification':
+                if in_result == True:
+                    in_result = False
+                    # pprint(temp_counterexample)
+                    counterexamples[result_num] = temp_counterexample
+                    temp_counterexample = []
+                if 'is false' in line:
+                    self.results.append(True)
+                    result_num += 1
+                elif 'is true' in line:
+                    self.results.append(False)
+                    result_num += 1
+
+            # If you are currently in a counterexample
+            if in_result:
+                temp_counterexample.append(line)
+
+            # If the next line is going to be the start of a counterexample, set the in_result flag
+            if line == 'Trace Type: Counterexample ':
+                in_result = True
+
+        if in_result == True:
+                    in_result = False
+                    counterexamples[result_num] = temp_counterexample
+                    temp_counterexample = []
+
+        for x in range(result_num + 1):
+            print "Result of checking:", self.checks[x]
+            print 'Statement is', self.results[x]
+            print 'Example:'
+            for y in counterexamples[x]:
+                print y
+            print ''
+
+        # pprint(self.results)
         # retain only the lines that return whether or not a specification is true/false
-        self.output = [x for x in self.output if x[:16] == '-- specification']
+        # self.output = [x for x in self.output if x[:16] == '-- specification']
 
         # Iterate throught the results and parse whether or not a statement is valid
-        for i in range(len(self.output)):
-            if 'is false' in self.output[i]:
-                self.results.append(True)
-            elif 'is true' in output[i]:
-                self.results.append(False)
+        # for i in range(len(self.output)):
+        #     if 'is false' in self.output[i]:
+        #         self.results.append(True)
+        #     elif 'is true' in output[i]:
+        #         self.results.append(False)
 
-        # print output to console
-        pprint(self.output)
-        pprint(self.results)
+        # # print output to console
+        # pprint(self.output)
+        # pprint(self.results)
 
 
 
