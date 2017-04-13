@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 """Parse module defines a parse class and defines contract and check file specifications"""
 
+import subprocess
+from src.operations import compatibility, consistency
 from src.contract import Contract
 from src.check import Check
 from src.check import Checks
+
 
 # contract file attributes
 TAB_WIDTH = 2
@@ -14,7 +17,6 @@ CONTRACT_VARIABLES_HEADER = 'VARIABLES:'
 CONTRACT_ASSUMPTIONS_HEADER = 'ASSUMPTIONS:'
 CONTRACT_GUARANTEES_HEADER = 'GUARANTEES:'
 CHECKS_HEADER = 'CHECKS:'
-
 
 def parse(infile):
     """Parses input text file
@@ -74,7 +76,7 @@ def compile(contracts, checks):
             outfile.write("\tinit(" + var_char + ")" + var[idx:] + ";\n")
         break
 
-    # -- END TEMP -- 
+    # -- END TEMP --
 
     outfile.write("\n")
 
@@ -84,22 +86,78 @@ def compile(contracts, checks):
         # print "\n", v
 
     # Iterate through all checks and run the corresponding function for that test (for now, only works with 2 contracts)
-    for check in checks:
-        if check.check_type == 'compatibility': 
-            comp = self.compatibility(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
+    for check in checks.checks:
+        if check.check_type == 'compatibility':
+            comp = compatibility(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
             outfile.write(comp)
 
                 # Uncomment the line below if you want to test the correctness of the composition function)
-                # self.composition(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
+                # composition(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
 
                 # Uncomment the line below if you want to test the correctness of the conjunction function)
-                # self.conjunction(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
-        elif check.check_type == 'consistency': 
-            const = self.consistency(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
+                # conjunction(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
+        elif check.check_type == 'consistency':
+            const = consistency(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
             outfile.write(const)
 
     # Return the name of the generated .smv file so the calling function can run NuSMV
     return 'nusmv.smv'
+
+
+def run(infile, checks):
+    """runs the set of contracts and checks through NuSMV and parses the results to return to the user"""
+
+    # Initialize an array to hold the results of the checks
+    results = []
+
+    # create the command and run in terminal
+    output = subprocess.check_output(['NuSMV', infile]).splitlines()
+
+    # Get rid of all initial notes, warnings and blank lines
+    output = [x for x in output if not (x[:3] == '***' or x[:7] == 'WARNING' or x == '')]
+    # pprint(self.output)
+
+    # Iterate through all remaining lines of output, stopping at each "-- specification line to parse it"
+    result_num = -1      # Counter to keep track of what result you're looking at
+    in_result = False   # Flag to track if you're in a counterexample output
+    temp_counterexample = []
+    counterexamples = {}
+
+    for line in output:
+        # If this line is going to indicate whether or not a LTL spec is true/false
+        if line[:16] == '-- specification':
+            if in_result == True:
+                in_result = False
+                # pprint(temp_counterexample)
+                counterexamples[result_num] = temp_counterexample
+                temp_counterexample = []
+            if 'is false' in line:
+                results.append(True)
+                result_num += 1
+            elif 'is true' in line:
+                results.append(False)
+                result_num += 1
+
+        # If you are currently in a counterexample
+        if in_result:
+            temp_counterexample.append(line)
+
+        # If the next line is going to be the start of a counterexample, set the in_result flag
+        if line == 'Trace Type: Counterexample ':
+            in_result = True
+
+    if in_result:
+        in_result = False
+        counterexamples[result_num] = temp_counterexample
+        temp_counterexample = []
+
+    for x in range(result_num + 1):
+        print "Result of checking:", checks.checks[x]
+        print 'Statement is', results[x]
+        print 'Example:'
+        for y in counterexamples[x]:
+            print y
+        print ''
 
 def __parse_contract(tab_lim, afile):
     """Parses a contract block within the input text file"""
@@ -166,12 +224,12 @@ def __parse_checks(tab_lim, afile, contracts):
 
     return checks
 
-def __clean_line(cls, line):
+def __clean_line(line):
     """Returns a comment-free, tab-replaced line with no ending whitespace"""
     line = line.split(COMMENT_CHAR, 1)[0] # remove comments
     line = line.replace('\t', ' ' * TAB_WIDTH) # replace tabs with spaces
     return line.rstrip() # remove ending whitespace
 
-def __line_indentation(cls, line):
+def __line_indentation(line):
     """Returns the number of indents on a given line"""
     return (len(line) - len(line.lstrip(' '))) / TAB_WIDTH

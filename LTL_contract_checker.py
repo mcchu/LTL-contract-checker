@@ -2,12 +2,10 @@
 # New main incorporating all pieces of the software tool
 # EE599 Final Project
 # Spring 2017
-import sys, getopt
+import sys
+import getopt
 
-from src.parser import Parser
-from src.contract import Contract
-from src.check import Check
-from src.check import Checks
+from src.fileio import parse, compile, run
 
 
 def main(argv):
@@ -15,29 +13,28 @@ def main(argv):
     inputfile = ''
     outputfile = ''
     try:
-      opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+        opts, _ = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
     except getopt.GetoptError:
-      print 'test.py -i <inputfile> -o <outputfile>'
-      sys.exit(2)
+        print 'test.py -i <inputfile> -o <outputfile>'
+        sys.exit(2)
     for opt, arg in opts:
-      if opt == '-h':
-         print 'test.py -i <inputfile> -o <outputfile>'
-         sys.exit()
-      elif opt in ("-i", "--ifile"):
-         inputfile = arg
-      elif opt in ("-o", "--ofile"):
-         outputfile = arg
+        if opt == '-h':
+            print 'test.py -i <inputfile> -o <outputfile>'
+            sys.exit()
+        elif opt in ("-i", "--ifile"):
+            inputfile = arg
+        elif opt in ("-o", "--ofile"):
+            outputfile = arg
 
-    # parse the input .txt model, return dictonary of contracts and a 'Checks' object
-    parser_obj = Parser(inputfile)
-    contracts, checks = parser_obj.parse()
-    
+    # parse system specification file
+    contracts, checks = parse(inputfile)
+
+    # compile NuSMV file
+    smvfile = compile(contracts, checks)
+
+    run(smvfile, checks)
+
     print checks
-
-
-    checks.run(contracts)
-
-
 
 if __name__ == "__main__":
     main(sys.argv[1:])
