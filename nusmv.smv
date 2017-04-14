@@ -6,5 +6,5 @@ ASSIGN
 	init(request) := FALSE;
 	init(service) := FALSE;
 
-	LTLSPEC !( (TRUE & TRUE) | !(( (TRUE) -> (G(!request -> X !service) & G(request -> X service)) ) & ( (TRUE) -> ((F request) & G((request & !service) -> X request) & G(service -> X !request)) )) );
-	LTLSPEC !(( (TRUE) -> (G(!request -> X !service) & G(request -> X service)) ) & ( (TRUE) -> ((F request) & G((request & !service) -> X request) & G(service -> X !request)) ));
+	LTLSPEC !((((TRUE) & (TRUE)) | !(((TRUE) -> (G(!request -> X !service) & G(request -> X service))) & ((TRUE) -> ((F request) & G((request & !service) -> X request) & G(service -> X !request))))));
+	LTLSPEC !(((((TRUE) & (TRUE)) | !(((TRUE) -> (G(!request -> X !service) & G(request -> X service))) & ((TRUE) -> ((F request) & G((request & !service) -> X request) & G(service -> X !request)))))) -> ((((TRUE) -> (G(!request -> X !service) & G(request -> X service))) & ((TRUE) -> ((F request) & G((request & !service) -> X request) & G(service -> X !request))))));
