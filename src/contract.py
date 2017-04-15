@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Contract module defines a contract class to store contract data attributes"""
+"""Contract module defines a contract class to store contract data attributes and a contracts class
+to store all system contracts and overall system alphabet"""
 
 class Contract(object):
     """Contract class stores data attributes of a contract
@@ -69,6 +70,43 @@ class Contract(object):
         # for guarantee in self.guarantees:
         #     astr += ('  ' + guarantee + '\n')
         return astr
+
+    def __eq__(self, other):
+        """Override the default Equals behavior"""
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        """Define a non-equality test"""
+        return not self.__eq__(other)
+
+class Contracts(object):
+    """Contracts class stores all contracts for a system
+
+    Attributes:
+        contracts: a list of contract objects
+    """
+
+    def __init__(self):
+        """Initialize a contracts object"""
+        self.contracts = []
+
+    def add_contract(self, contract):
+        """Add a contract to the contracts object
+
+        Args:
+            contract: a contract object
+        """
+        self.contracts.append(contract)
+
+    def get_contracts(self):
+        """Get all contracts in the contracts object
+
+        Returns:
+            A list of contract objects
+        """
+        return self.contracts
 
     def __eq__(self, other):
         """Override the default Equals behavior"""
