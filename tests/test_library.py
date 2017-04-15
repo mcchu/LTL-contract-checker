@@ -6,7 +6,7 @@ import sys
 import unittest
 from src.core import parse, generate, run
 from src.contract import Contract, Contracts
-from src.check import Check, Checks
+from src.check import Compatibility, Consistency, Checks
 
 sys.path.append(os.path.join(os.getcwd(), os.path.pardir))
 
@@ -45,14 +45,12 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(test_contracts, contracts)
 
         # verify compatibility check
-        compatibility = Check()
-        compatibility.set_type('compatibility')
+        compatibility = Compatibility()
         compatibility.set_contracts([waiter, customer])
         self.assertEqual(compatibility, checks.checks[0])
 
         # verify consistency check
-        consistency = Check()
-        consistency.set_type('consistency')
+        consistency = Consistency()
         consistency.set_contracts([waiter, customer])
         self.assertEqual(consistency, checks.checks[1])
 
