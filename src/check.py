@@ -58,3 +58,14 @@ class Checks(object):
         for check in self.checks:
             astr += ('\'' + check.contract_names[0] + '\'' + ' ' + check.check_type + ' with ' + '\'' + check.contract_names[1] + '\'' + '\n')
         return astr
+
+    def __eq__(self, other):
+        """Override the default Equals behavior"""
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        """Define a non-equality test"""
+        return not self.__eq__(other)
+

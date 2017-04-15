@@ -22,7 +22,7 @@ def parse(infile):
     """Parses input text file
 
     Returns:
-            A tuple of a list of contracts and a list of checks
+        A tuple of a list of contracts and a list of checks
 
     """
     # init return variables
@@ -50,7 +50,7 @@ def parse(infile):
 
     return contracts, checks
 
-def compile(contracts, checks):
+def generate(contracts, checks):
 
     # generate output file
     outfile = open('nusmv.smv', 'w')
@@ -99,14 +99,14 @@ def compile(contracts, checks):
     return 'nusmv.smv'
 
 
-def run(infile, checks):
+def run(smvfile, checks):
     """runs the set of contracts and checks through NuSMV and parses the results to return to the user"""
 
     # Initialize an array to hold the results of the checks
     results = []
 
     # create the command and run in terminal
-    output = subprocess.check_output(['NuSMV', infile]).splitlines()
+    output = subprocess.check_output(['NuSMV', smvfile]).splitlines()
 
     # Get rid of all initial notes, warnings and blank lines
     output = [x for x in output if not (x[:3] == '***' or x[:7] == 'WARNING' or x == '')]
