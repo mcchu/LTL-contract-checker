@@ -4,7 +4,7 @@
 import subprocess
 from src.operations import compatibility, consistency
 from src.contract import Contract, Contracts
-from src.check import Check, Checks
+from src.check import Compatibility, Consistency, Checks
 
 
 # contract file attributes
@@ -17,6 +17,8 @@ CONTRACT_VARIABLES_HEADER = 'VARIABLES:'
 CONTRACT_ASSUMPTIONS_HEADER = 'ASSUMPTIONS:'
 CONTRACT_GUARANTEES_HEADER = 'GUARANTEES:'
 CHECKS_HEADER = 'CHECKS:'
+COMPATIBILITY_CHECK = 'compatibility'
+CONSISTENCY_CHECK = 'consistency'
 
 def parse(specfile):
     """Parses the system specification file and returns the contracts and checks
@@ -27,7 +29,6 @@ def parse(specfile):
     Returns:
         A tuple containing a contracts object and a checks object
     """
-
     # init return variables
     contracts, checks = Contracts(), None
 
@@ -61,7 +62,6 @@ def generate(contracts, checks, smvfile):
         checks: a checks object containing all the desired checks on the system
         smvfile: a string name for the generated NuSMV file
     """
-
     with open(smvfile, 'w') as ofile:
 
         # write module heading declaration
@@ -78,20 +78,9 @@ def generate(contracts, checks, smvfile):
             ofile.write('\tinit(' + var + ') := ' + init + ';\n')
         ofile.write('\n')
 
-        # Iterate through all checks and run the corresponding function for that test (for now, only works with 2 contracts)
+        # write LTL specifications declarations for each check
         for check in checks.checks:
-            if check.check_type == 'compatibility':
-                comp = compatibility(contracts.get_contract(check.contract_names[0]),contracts.get_contract(check.contract_names[1]))
-                ofile.write(comp)
-
-                    # Uncomment the line below if you want to test the correctness of the composition function)
-                    # composition(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
-
-                    # Uncomment the line below if you want to test the correctness of the conjunction function)
-                    # conjunction(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
-            elif check.check_type == 'consistency':
-                const = consistency(contracts.get_contract(check.contract_names[0]),contracts.get_contract(check.contract_names[1]))
-                ofile.write(const)
+            ofile.write(check.get_ltl())
 
 def run(smvfile, checks):
     """runs the set of contracts and checks through NuSMV and parses the results to return to the user"""
@@ -213,9 +202,18 @@ def _parse_checks(tab_lim, afile, contracts):
             check_contracts = check_contracts[:-1].split(',')
             check_contracts = [contracts.get_contract(x.strip()) for x in check_contracts]
 
-            # construct and store check
-            check = Check()
-            check.set_type(check_type.strip())
+            # construct compatibility check
+            if check_type.strip() == COMPATIBILITY_CHECK:
+                check = Compatibility()
+
+            # construct consistency check
+            elif check_type.strip() == CONSISTENCY_CHECK:
+                check = Consistency()
+
+            # (TODO) add error - unrecognized check
+            else:
+                continue
+
             check.set_contracts(check_contracts)
             checks.add_check(check)
 
