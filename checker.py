@@ -5,7 +5,7 @@
 import sys
 import getopt
 
-from src.fileio import parse, compile, run
+from src.core import parse, generate, run
 
 
 def main(argv):
@@ -30,7 +30,7 @@ def main(argv):
     contracts, checks = parse(inputfile)
 
     # compile NuSMV file
-    smvfile = compile(contracts, checks)
+    smvfile = generate(contracts, checks)
 
     print checks
 
