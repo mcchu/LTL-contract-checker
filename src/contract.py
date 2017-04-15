@@ -20,7 +20,9 @@ class Contract(object):
 
     def set_name(self, name):
         """Assigns the contract a name"""
-        self.name = name[0]
+        if isinstance(name, list):
+            name = name[0]
+        self.name = name
 
     def set_variables(self, variables):
         """Assigns the contract variables"""
@@ -28,36 +30,31 @@ class Contract(object):
 
     def set_assumptions(self, assumptions):
         """Assigns the contract assumptions"""
+        if isinstance(assumptions, str):
+            assumptions = [assumptions]
         self.assumptions = assumptions
 
     def set_guarantees(self, guarantees):
         """Assigns the contract guarantees"""
+        if isinstance(guarantees, str):
+            guarantees = [guarantees]
         self.guarantees = guarantees
 
-    def cleanup_contract(self):
-        """Concatenates all assumptions and guarantees and puts the contract
-        into saturated form"""
-        self.concatenate_assumptions()
-        self.concatenate_guarantees()
-        self.saturate()
+    def get_assumptions(self):
+        """Returns concatenated string of all assumptions"""
+        assumptions = [assumption + ' & ' for assumption in self.assumptions]
+        return '(' + ''.join(assumptions)[:-3] + ')'
 
-    def concatenate_assumptions(self):
-        """Takes in a contract with a list of assumptions and concatenates them all"""
-        st = ""
-        for assumption in self.assumptions:
-            st += (assumption + " & ")
-        self.assumptions = st[:-3]
+    def get_unsat_guarantees(self):
+        """Returns concatenated string of all guarantees in unsaturated form"""
+        guarantees = [guarantee + ' & ' for guarantee in self.guarantees]
+        return '(' + ''.join(guarantees)[:-3] + ')'
 
-    def concatenate_guarantees(self):
-        """Takes in a contract with a list of guaranteesa and concatenates them all"""
-        st = ""
-        for guarantee in self.guarantees:
-            st += (guarantee + " & ")
-        self.guarantees = st[:-3]
-
-    def saturate(self):
-        """Takes in a contract and modifies its guarantees to be in saturated form"""
-        self.guarantees = "( (" + self.assumptions + ") -> (" + self.guarantees + ") )"
+    def get_guarantees(self):
+        """Returns concatenated string of all guarantees in saturated form"""
+        assumptions = self.get_assumptions()
+        guarantees = self.get_unsat_guarantees()
+        return  '(' + assumptions + ' -> ' + guarantees + ')'
 
     def __str__(self):
         """Override the print behavior"""

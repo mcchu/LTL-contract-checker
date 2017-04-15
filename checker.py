@@ -32,9 +32,9 @@ def main(argv):
     # compile NuSMV file
     smvfile = compile(contracts, checks)
 
-    run(smvfile, checks)
-
     print checks
+
+    run(smvfile, checks)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

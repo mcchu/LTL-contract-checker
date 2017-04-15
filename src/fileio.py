@@ -31,7 +31,7 @@ def parse(infile):
     with open(infile, 'r') as in_file:
 
         for line in in_file:
-            line = __clean_line(line)
+            line = _clean_line(line)
 
             # skip empty lines
             if not line.strip():
@@ -39,14 +39,14 @@ def parse(infile):
 
             # parse contract
             if CONTRACT_HEADER in line:
-                tab_lim = __line_indentation(line)
-                contract = __parse_contract(tab_lim, in_file)
+                tab_lim = _line_indentation(line)
+                contract = _parse_contract(tab_lim, in_file)
                 contracts[contract.name] = contract
 
             # parse checks
             if CHECKS_HEADER in line:
-                tab_lim = __line_indentation(line)
-                checks = __parse_checks(tab_lim, in_file, contracts)
+                tab_lim = _line_indentation(line)
+                checks = _parse_checks(tab_lim, in_file, contracts)
 
     return contracts, checks
 
@@ -79,11 +79,6 @@ def compile(contracts, checks):
     # -- END TEMP --
 
     outfile.write("\n")
-
-    # Cleanup the Contracts to concatenate assumptions and guarantees and put into saturated form
-    for k,v in contracts.items():
-        v.cleanup_contract()
-        # print "\n", v
 
     # Iterate through all checks and run the corresponding function for that test (for now, only works with 2 contracts)
     for check in checks.checks:
@@ -159,7 +154,7 @@ def run(infile, checks):
             print y
         print ''
 
-def __parse_contract(tab_lim, afile):
+def _parse_contract(tab_lim, afile):
     """Parses a contract block within the input text file"""
     contract = Contract() # init contract object
     group = None # init group variable
@@ -174,8 +169,8 @@ def __parse_contract(tab_lim, afile):
 
     # parse contract
     for line in afile:
-        line = __clean_line(line)
-        tab_len = __line_indentation(line)
+        line = _clean_line(line)
+        tab_len = _line_indentation(line)
 
         # end parse when number of indents is lower than or equal to tab limit
         if tab_len <= tab_lim:
@@ -194,14 +189,14 @@ def __parse_contract(tab_lim, afile):
 
     return contract
 
-def __parse_checks(tab_lim, afile, contracts):
+def _parse_checks(tab_lim, afile, contracts):
     """Parses the checks block within the input text file"""
     checks = Checks()
 
     # parse checks
     for line in afile:
-        line = __clean_line(line)
-        tab_len = __line_indentation(line)
+        line = _clean_line(line)
+        tab_len = _line_indentation(line)
 
         # end parse when number of indents is lower than or equal to tab limit
         if tab_len <= tab_lim:
@@ -224,12 +219,12 @@ def __parse_checks(tab_lim, afile, contracts):
 
     return checks
 
-def __clean_line(line):
+def _clean_line(line):
     """Returns a comment-free, tab-replaced line with no ending whitespace"""
     line = line.split(COMMENT_CHAR, 1)[0] # remove comments
     line = line.replace('\t', ' ' * TAB_WIDTH) # replace tabs with spaces
     return line.rstrip() # remove ending whitespace
 
-def __line_indentation(line):
+def _line_indentation(line):
     """Returns the number of indents on a given line"""
     return (len(line) - len(line.lstrip(' '))) / TAB_WIDTH
