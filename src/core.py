@@ -3,14 +3,14 @@
 
 import subprocess
 from src.operations import compatibility, consistency
-from src.contract import Contract
-from src.check import Check
-from src.check import Checks
+from src.contract import Contract, Contracts
+from src.check import Check, Checks
 
 
 # contract file attributes
 TAB_WIDTH = 2
 COMMENT_CHAR = '##'
+ASSIGNMENT_CHAR = ':='
 CONTRACT_HEADER = 'CONTRACT:'
 CONTRACT_NAME_HEADER = 'NAME:'
 CONTRACT_VARIABLES_HEADER = 'VARIABLES:'
@@ -19,14 +19,17 @@ CONTRACT_GUARANTEES_HEADER = 'GUARANTEES:'
 CHECKS_HEADER = 'CHECKS:'
 
 def parse(infile):
-    """Parses input text file
+    """Parses the system specification file and returns the contracts and checks
+
+    Args:
+        infile: a string input file name for the system specification file
 
     Returns:
-        A tuple of a list of contracts and a list of checks
-
+        A tuple containing a contracts object and a checks object
     """
+
     # init return variables
-    contracts, checks = {}, None
+    contracts, checks = Contracts(), None
 
     with open(infile, 'r') as in_file:
 
@@ -41,7 +44,7 @@ def parse(infile):
             if CONTRACT_HEADER in line:
                 tab_lim = _line_indentation(line)
                 contract = _parse_contract(tab_lim, in_file)
-                contracts[contract.name] = contract
+                contracts.add_contract(contract)
 
             # parse checks
             if CHECKS_HEADER in line:
@@ -51,40 +54,33 @@ def parse(infile):
     return contracts, checks
 
 def generate(contracts, checks):
+    """Generates a NuSMV file with configured variable declarations and LTL checks
 
-    # generate output file
-    outfile = open('nusmv.smv', 'w')
-    outfile.write("MODULE main\n")
+    Args:
+        contracts: a contracts object containing all the contracts in a system
+        checks: a checks object containing all the desired checks on the system
+    """
 
-    # Iterate through the contracts dictionary, breaking after printing the variables from the first contract
-    # (because for now, all contracts have the same variables)
-    # TEMP -> Change for alphabet projection
-    outfile.write("VAR\n")
-    for k, v in contracts.items():
-        for var in v.variables:
-            var_char = var[:(var.find(":="))]
-            outfile.write("\t" + var_char + ": boolean;\n")
-        break
+    # generate nusmv file and write heading
+    smvfile = open('nusmv.smv', 'w')
+    smvfile.write('MODULE main\n')
 
-    # Iterate through the contracts dictionary, breaking after initializing the values of the variables
-    # from the first contract
-    outfile.write("ASSIGN\n")
-    for k, v in contracts.items():
-        for var in v.variables:
-            idx = var.find(" :=")
-            var_char = var[:idx]
-            outfile.write("\tinit(" + var_char + ")" + var[idx:] + ";\n")
-        break
+    # write variable type declarations
+    smvfile.write('VAR\n')
+    for (var, _) in contracts.get_alphabet():
+        smvfile.write('\t' + var + ': boolean;\n')
 
-    # -- END TEMP --
-
-    outfile.write("\n")
+    # write variable assignment declarations
+    smvfile.write('ASSIGN\n')
+    for (var, init) in contracts.get_alphabet():
+        smvfile.write('\tinit(' + var + ') := ' + init + ';\n')
+    smvfile.write('\n')
 
     # Iterate through all checks and run the corresponding function for that test (for now, only works with 2 contracts)
     for check in checks.checks:
         if check.check_type == 'compatibility':
-            comp = compatibility(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
-            outfile.write(comp)
+            comp = compatibility(contracts.get_contract(check.contract_names[0]),contracts.get_contract(check.contract_names[1]))
+            smvfile.write(comp)
 
                 # Uncomment the line below if you want to test the correctness of the composition function)
                 # composition(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
@@ -92,8 +88,8 @@ def generate(contracts, checks):
                 # Uncomment the line below if you want to test the correctness of the conjunction function)
                 # conjunction(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
         elif check.check_type == 'consistency':
-            const = consistency(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
-            outfile.write(const)
+            const = consistency(contracts.get_contract(check.contract_names[0]),contracts.get_contract(check.contract_names[1]))
+            smvfile.write(const)
 
     # Return the name of the generated .smv file so the calling function can run NuSMV
     return 'nusmv.smv'
@@ -157,7 +153,7 @@ def run(smvfile, checks):
 def _parse_contract(tab_lim, afile):
     """Parses a contract block within the input text file"""
     contract = Contract() # init contract object
-    group = None # init group variable
+    group = () # init group variable
 
     # init array for contract data and contract data adder utility functions
     data = [
@@ -182,7 +178,15 @@ def _parse_contract(tab_lim, afile):
 
         # when number of indents is more than header, parce data
         else:
-            group[3].append(line.strip())
+
+            # parse variables into tuples
+            if group[0] == 'variables':
+                var, init = line.split(ASSIGNMENT_CHAR, 1)
+                group[3].append((var.strip(), init.strip()))
+
+            # parse name, assumptions, and guarantees
+            else:
+                group[3].append(line.strip())
 
     # add contract elements to contract object
     data = [x[2](x[3]) for x in data]
@@ -209,7 +213,7 @@ def _parse_checks(tab_lim, afile, contracts):
 
             # find contracts associated with check
             check_contracts = check_contracts[:-1].split(',')
-            check_contracts = [contracts[x.strip()] for x in check_contracts]
+            check_contracts = [contracts.get_contract(x.strip()) for x in check_contracts]
 
             # construct and store check
             check = Check()

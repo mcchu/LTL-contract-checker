@@ -2,12 +2,14 @@
 """Contract module defines a contract class to store contract data attributes and a contracts class
 to store all system contracts and overall system alphabet"""
 
+from collections import OrderedDict
+
 class Contract(object):
     """Contract class stores data attributes of a contract
 
     Attributes:
         name: a string name for the contract
-        variables: a list of string variables from assumptions and guarantees
+        variables: a list of tuples containing string variables and initial values
         assumptions: a list of string relations assumed by contract
         guarantees: a list of string relations guaranteed by contract
     """
@@ -60,16 +62,16 @@ class Contract(object):
     def __str__(self):
         """Override the print behavior"""
         astr = 'Name: ' + self.name + '\n'
-        astr += 'Variables:\n'
-        for variable in self.variables:
-            astr += ('  ' + variable + '\n')
-        astr += 'Assumptions:' + self.assumptions + '\n'
-        # for assumption in self.assumptions:
-        #     astr += ('  ' + assumption + '\n')
-        astr += 'Guarantees:' + self.guarantees + '\n'
-        # for guarantee in self.guarantees:
-        #     astr += ('  ' + guarantee + '\n')
-        return astr
+        astr += 'Variables:'
+        for var, init in self.variables:
+            astr += ' [' + var + ' := ' + init + '] '
+        astr += '\nAssumptions:'
+        for assumption in self.assumptions:
+            astr += ' [' + assumption + '] '
+        astr += '\nGuarantees:'
+        for guarantee in self.guarantees:
+            astr += ' [' + guarantee + '] '
+        return astr + '\n'
 
     def __eq__(self, other):
         """Override the default Equals behavior"""
@@ -91,7 +93,7 @@ class Contracts(object):
 
     def __init__(self):
         """Initialize a contracts object"""
-        self.contracts = []
+        self.contracts = OrderedDict()
         self.alphabet = []
 
     def add_contract(self, contract):
@@ -100,8 +102,18 @@ class Contracts(object):
         Args:
             contract: a contract object
         """
-        self.contracts.append(contract)
+        self.contracts[contract.name] = contract
         self.alphabet = list(set(self.alphabet) | set(contract.variables))
+
+    def get_contract(self, name):
+        """Get the contract with the specified name
+
+        Args:
+            name: a string name associated with a contract
+
+        Returns:
+            A contract object with the specified name"""
+        return self.contracts[name]
 
     def get_contracts(self):
         """Get all contracts in the contracts object
@@ -118,6 +130,13 @@ class Contracts(object):
             A list of tuples containing the shared alphabet and their initial values
         """
         return self.alphabet
+
+    def __str__(self):
+        """Override the print behavior"""
+        astr = 'Contracts: \n'
+        for (name, _) in self.contracts.iteritems():
+            astr += name + '\n'
+        return astr
 
     def __eq__(self, other):
         """Override the default Equals behavior"""
