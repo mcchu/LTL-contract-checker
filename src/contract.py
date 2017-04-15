@@ -10,8 +10,8 @@ class Contract(object):
         variables: a list of string variables from assumptions and guarantees
         assumptions: a list of string relations assumed by contract
         guarantees: a list of string relations guaranteed by contract
-
     """
+
     def __init__(self):
         """Initialize a contract object"""
         self.name = ''
@@ -82,23 +82,26 @@ class Contract(object):
         return not self.__eq__(other)
 
 class Contracts(object):
-    """Contracts class stores all contracts for a system
+    """Contracts class stores all contracts for a system and the shared alphabet
 
     Attributes:
         contracts: a list of contract objects
+        alphabet: a list of tuples containing the shared alphabet among all contracts
     """
 
     def __init__(self):
         """Initialize a contracts object"""
         self.contracts = []
+        self.alphabet = []
 
     def add_contract(self, contract):
-        """Add a contract to the contracts object
+        """Add a contract to the contracts object and update the alphabet
 
         Args:
             contract: a contract object
         """
         self.contracts.append(contract)
+        self.alphabet = list(set(self.alphabet) | set(contract.variables))
 
     def get_contracts(self):
         """Get all contracts in the contracts object
@@ -107,6 +110,14 @@ class Contracts(object):
             A list of contract objects
         """
         return self.contracts
+
+    def get_alphabet(self):
+        """Get the shared contract alphabet
+
+        Returns:
+            A list of tuples containing the shared alphabet and their initial values
+        """
+        return self.alphabet
 
     def __eq__(self, other):
         """Override the default Equals behavior"""
