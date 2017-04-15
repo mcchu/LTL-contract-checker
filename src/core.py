@@ -18,11 +18,11 @@ CONTRACT_ASSUMPTIONS_HEADER = 'ASSUMPTIONS:'
 CONTRACT_GUARANTEES_HEADER = 'GUARANTEES:'
 CHECKS_HEADER = 'CHECKS:'
 
-def parse(infile):
+def parse(specfile):
     """Parses the system specification file and returns the contracts and checks
 
     Args:
-        infile: a string input file name for the system specification file
+        specfile: a string input file name for the system specification file
 
     Returns:
         A tuple containing a contracts object and a checks object
@@ -31,9 +31,9 @@ def parse(infile):
     # init return variables
     contracts, checks = Contracts(), None
 
-    with open(infile, 'r') as in_file:
+    with open(specfile, 'r') as ifile:
 
-        for line in in_file:
+        for line in ifile:
             line = _clean_line(line)
 
             # skip empty lines
@@ -43,57 +43,55 @@ def parse(infile):
             # parse contract
             if CONTRACT_HEADER in line:
                 tab_lim = _line_indentation(line)
-                contract = _parse_contract(tab_lim, in_file)
+                contract = _parse_contract(tab_lim, ifile)
                 contracts.add_contract(contract)
 
             # parse checks
             if CHECKS_HEADER in line:
                 tab_lim = _line_indentation(line)
-                checks = _parse_checks(tab_lim, in_file, contracts)
+                checks = _parse_checks(tab_lim, ifile, contracts)
 
     return contracts, checks
 
-def generate(contracts, checks):
+def generate(contracts, checks, smvfile):
     """Generates a NuSMV file with configured variable declarations and LTL checks
 
     Args:
         contracts: a contracts object containing all the contracts in a system
         checks: a checks object containing all the desired checks on the system
+        smvfile: a string name for the generated NuSMV file
     """
 
-    # generate nusmv file and write heading
-    smvfile = open('nusmv.smv', 'w')
-    smvfile.write('MODULE main\n')
+    with open(smvfile, 'w') as ofile:
 
-    # write variable type declarations
-    smvfile.write('VAR\n')
-    for (var, _) in contracts.get_alphabet():
-        smvfile.write('\t' + var + ': boolean;\n')
+        # write module heading declaration
+        ofile.write('MODULE main\n')
 
-    # write variable assignment declarations
-    smvfile.write('ASSIGN\n')
-    for (var, init) in contracts.get_alphabet():
-        smvfile.write('\tinit(' + var + ') := ' + init + ';\n')
-    smvfile.write('\n')
+        # write variable type declarations
+        ofile.write('VAR\n')
+        for (var, _) in contracts.get_alphabet():
+            ofile.write('\t' + var + ': boolean;\n')
 
-    # Iterate through all checks and run the corresponding function for that test (for now, only works with 2 contracts)
-    for check in checks.checks:
-        if check.check_type == 'compatibility':
-            comp = compatibility(contracts.get_contract(check.contract_names[0]),contracts.get_contract(check.contract_names[1]))
-            smvfile.write(comp)
+        # write variable assignment declarations
+        ofile.write('ASSIGN\n')
+        for (var, init) in contracts.get_alphabet():
+            ofile.write('\tinit(' + var + ') := ' + init + ';\n')
+        ofile.write('\n')
 
-                # Uncomment the line below if you want to test the correctness of the composition function)
-                # composition(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
+        # Iterate through all checks and run the corresponding function for that test (for now, only works with 2 contracts)
+        for check in checks.checks:
+            if check.check_type == 'compatibility':
+                comp = compatibility(contracts.get_contract(check.contract_names[0]),contracts.get_contract(check.contract_names[1]))
+                ofile.write(comp)
 
-                # Uncomment the line below if you want to test the correctness of the conjunction function)
-                # conjunction(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
-        elif check.check_type == 'consistency':
-            const = consistency(contracts.get_contract(check.contract_names[0]),contracts.get_contract(check.contract_names[1]))
-            smvfile.write(const)
+                    # Uncomment the line below if you want to test the correctness of the composition function)
+                    # composition(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
 
-    # Return the name of the generated .smv file so the calling function can run NuSMV
-    return 'nusmv.smv'
-
+                    # Uncomment the line below if you want to test the correctness of the conjunction function)
+                    # conjunction(contracts[check.contract_names[0]],contracts[check.contract_names[1]])
+            elif check.check_type == 'consistency':
+                const = consistency(contracts.get_contract(check.contract_names[0]),contracts.get_contract(check.contract_names[1]))
+                ofile.write(const)
 
 def run(smvfile, checks):
     """runs the set of contracts and checks through NuSMV and parses the results to return to the user"""
