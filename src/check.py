@@ -34,10 +34,13 @@ class Check(object):
         self.contracts[contract.name] = contract
 
     def get_contract(self, name):
-        """Returns a contract object associated with the check that has the specified name
+        """Get a specific contract associated with the check
 
         Args:
             name: a string name of a contract
+        
+        Returns:
+            A contract object with the specified name
         """
         return self.contracts[name]
 

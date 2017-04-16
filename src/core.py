@@ -2,21 +2,19 @@
 """Parse module defines a parse class and defines contract and check file specifications"""
 
 import subprocess
-from src.operations import compatibility, consistency
 from src.contract import Contract, Contracts
 from src.check import Compatibility, Consistency, Checks
-
 
 # contract file attributes
 TAB_WIDTH = 2
 COMMENT_CHAR = '##'
 ASSIGNMENT_CHAR = ':='
-CONTRACT_HEADER = 'CONTRACT:'
-CONTRACT_NAME_HEADER = 'NAME:'
-CONTRACT_VARIABLES_HEADER = 'VARIABLES:'
-CONTRACT_ASSUMPTIONS_HEADER = 'ASSUMPTIONS:'
-CONTRACT_GUARANTEES_HEADER = 'GUARANTEES:'
-CHECKS_HEADER = 'CHECKS:'
+CONTRACT_HEADER = 'CONTRACT'
+CONTRACT_NAME_HEADER = 'NAME'
+CONTRACT_VARIABLES_HEADER = 'VARIABLES'
+CONTRACT_ASSUMPTIONS_HEADER = 'ASSUMPTIONS'
+CONTRACT_GUARANTEES_HEADER = 'GUARANTEES'
+CHECKS_HEADER = 'CHECKS'
 COMPATIBILITY_CHECK = 'compatibility'
 CONSISTENCY_CHECK = 'consistency'
 
@@ -140,15 +138,7 @@ def run(smvfile, checks):
 def _parse_contract(tab_lim, afile):
     """Parses a contract block within the input text file"""
     contract = Contract() # init contract object
-    group = () # init group variable
-
-    # init array for contract data and contract data adder utility functions
-    data = [
-        ('name', CONTRACT_NAME_HEADER, contract.set_name, []),
-        ('variables', CONTRACT_VARIABLES_HEADER, contract.set_variables, []),
-        ('assumptions', CONTRACT_ASSUMPTIONS_HEADER, contract.set_assumptions, []),
-        ('guarantees', CONTRACT_GUARANTEES_HEADER, contract.set_guarantees, [])
-    ]
+    header = '' # init header variable
 
     # parse contract
     for line in afile:
@@ -161,22 +151,34 @@ def _parse_contract(tab_lim, afile):
 
         # when number of indents is one more than limit, parce header
         elif tab_len == tab_lim + 1:
-            group = [x for x in data if x[1] in line][0]
+            header = line
 
         # when number of indents is more than header, parce data
-        else:
+        elif tab_len == tab_lim + 2:
 
-            # parse variables into tuples
-            if group[0] == 'variables':
+            if CONTRACT_NAME_HEADER in header:
+                contract.add_name(line.strip())
+
+            elif CONTRACT_VARIABLES_HEADER in header:
                 var, init = line.split(ASSIGNMENT_CHAR, 1)
-                group[3].append((var.strip(), init.strip()))
+                contract.add_variable((var.strip(), init.strip()))
 
-            # parse name, assumptions, and guarantees
+            elif CONTRACT_ASSUMPTIONS_HEADER in header:
+                contract.add_assumption(line.strip())
+
+            elif CONTRACT_GUARANTEES_HEADER in header:
+                contract.add_guarantee(line.strip())
+
+            # (TODO) add error - unexpected contract heading
             else:
-                group[3].append(line.strip())
+                continue
 
-    # add contract elements to contract object
-    data = [x[2](x[3]) for x in data]
+        # (TODO) add error - unexpected number of indentations
+        else:
+            continue
+
+    # saturate contract guarantees
+    contract.saturate_guarantees()
 
     return contract
 

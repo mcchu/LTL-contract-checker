@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Checker module defines the main function which runs the LTL contract checker tool workflow"""
+
 import sys
 import getopt
 from src.core import parse, generate, run
@@ -37,6 +38,8 @@ def main():
 
     # parse system specification file
     contracts, checks = parse(spec_file)
+
+    print contracts
 
     # compile NuSMV file
     generate(contracts, checks, smv_file)

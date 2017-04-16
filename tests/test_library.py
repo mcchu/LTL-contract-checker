@@ -10,7 +10,6 @@ from src.check import Compatibility, Consistency, Checks
 
 sys.path.append(os.path.join(os.getcwd(), os.path.pardir))
 
-
 class TestLibrary(unittest.TestCase):
     """TestLibrary class contains method to test LTL contract verifier operations"""
 
@@ -22,20 +21,21 @@ class TestLibrary(unittest.TestCase):
 
         # verify waiter contract parsed correctly
         waiter = Contract()
-        waiter.set_name(['waiter'])
-        waiter.set_variables([('request', 'FALSE'), ('service', 'FALSE')])
-        waiter.set_assumptions(['TRUE'])
-        waiter.set_guarantees(
-            ['G(!request -> X !service)', 'G(request -> X service)'])
+        waiter.add_name('waiter')
+        waiter.add_variables([('request', 'FALSE'), ('service', 'FALSE')])
+        waiter.add_assumption('TRUE')
+        waiter.add_guarantee('((TRUE) -> G(!request -> X !service))')
+        waiter.add_guarantee('((TRUE) -> G(request -> X service))')
         self.assertEqual(contracts.get_contract('waiter'), waiter)
 
         # verify customer contract parsed correctly
         customer = Contract()
-        customer.set_name(['customer'])
-        customer.set_variables([('request', 'FALSE'), ('service', 'FALSE')])
-        customer.set_assumptions(['TRUE'])
-        customer.set_guarantees(['(F request)', 'G((request & !service) -> X request)',
-                                 'G(service -> X !request)'])
+        customer.add_name('customer')
+        customer.add_variables([('request', 'FALSE'), ('service', 'FALSE')])
+        customer.add_assumption('TRUE')
+        customer.add_guarantee('((TRUE) -> (F request))')
+        customer.add_guarantee('((TRUE) -> G((request & !service) -> X request))')
+        customer.add_guarantee('((TRUE) -> G(service -> X !request))')
         self.assertEqual(contracts.get_contract('customer'), customer)
 
         # verify all contracts have been parsed
