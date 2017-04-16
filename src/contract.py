@@ -13,7 +13,6 @@ class Contract(object):
         assumptions: a list of string relations assumed by contract
         guarantees: a list of string relations guaranteed by contract
     """
-
     def __init__(self):
         """Initialize a contract object"""
         self.name = ''
@@ -21,57 +20,84 @@ class Contract(object):
         self.assumptions = []
         self.guarantees = []
 
-    def set_name(self, name):
-        """Assigns the contract a name"""
-        if isinstance(name, list):
-            name = name[0]
+    def add_name(self, name):
+        """Assigns the contract a name
+
+        Args:
+            name: a string name for the contract
+        """
         self.name = name
 
-    def set_variables(self, variables):
-        """Assigns the contract variables"""
-        self.variables = variables
+    def add_variable(self, variable):
+        """Adds a variable to the contract variables
 
-    def set_assumptions(self, assumptions):
-        """Assigns the contract assumptions"""
-        if isinstance(assumptions, str):
-            assumptions = [assumptions]
-        self.assumptions = assumptions
+        Args:
+            variable: a tuple containing a variable and initial value
+        """
+        self.variables.append(variable)
 
-    def set_guarantees(self, guarantees):
-        """Assigns the contract guarantees"""
-        if isinstance(guarantees, str):
-            guarantees = [guarantees]
-        self.guarantees = guarantees
+    def add_variables(self, variables):
+        """Adds a list of variables to the contract variables
+
+        Args:
+            variables: a list of tuples containing variables and initial values
+        """
+        for variable in variables:
+            self.variables.append(variable)
+
+    def add_assumption(self, assumption):
+        """Adds an assumption to the contract assumptions
+
+        Args:
+            assumption: a string assumption
+        """
+        self.assumptions.append(assumption)
+
+    def add_guarantee(self, guarantee):
+        """Adds a guarantee to the contract guarantees
+
+        Args:
+            guarantee: a string guarantee
+        """
+        self.guarantees.append(guarantee)
 
     def get_assumptions(self):
-        """Returns concatenated string of all assumptions"""
+        """Get a concatenated string of all assumptions
+
+        Returns:
+            A parenthesized, concatenated string of assumptions
+        """
         assumptions = [assumption + ' & ' for assumption in self.assumptions]
         return '(' + ''.join(assumptions)[:-3] + ')'
 
-    def get_unsat_guarantees(self):
-        """Returns concatenated string of all guarantees in unsaturated form"""
+    def get_guarantees(self):
+        """Get a concatenated string of all guarantees
+
+        Returns:
+            A parenthesized, concatenated string of guarantees
+        """
         guarantees = [guarantee + ' & ' for guarantee in self.guarantees]
         return '(' + ''.join(guarantees)[:-3] + ')'
 
-    def get_guarantees(self):
-        """Returns concatenated string of all guarantees in saturated form"""
+    def saturate_guarantees(self):
+        """Helper function that saturates each guarantee with contract assumptions"""
         assumptions = self.get_assumptions()
-        guarantees = self.get_unsat_guarantees()
-        return  '(' + assumptions + ' -> ' + guarantees + ')'
+        self.guarantees = ['(' + assumptions + ' -> ' +
+                           guarantee + ')' for guarantee in self.guarantees]
 
     def __str__(self):
         """Override the print behavior"""
-        astr = 'Name: ' + self.name + '\n'
-        astr += 'Variables:'
+        astr = '[\n  name: [ ' + self.name + ' ]\n'
+        astr += '  variables: [ '
         for var, init in self.variables:
-            astr += ' [' + var + ' := ' + init + '] '
-        astr += '\nAssumptions:'
+            astr += '(' + var + ' := ' + init + '), '
+        astr = astr[:-2] + ' ]\n  assumptions: [ '
         for assumption in self.assumptions:
-            astr += ' [' + assumption + '] '
-        astr += '\nGuarantees:'
+            astr += assumption + ', '
+        astr = astr[:-2] + ' ]\n  guarantees: [ '
         for guarantee in self.guarantees:
-            astr += ' [' + guarantee + '] '
-        return astr + '\n'
+            astr += guarantee + ', '
+        return astr[:-2] + ' ]\n]'
 
     def __eq__(self, other):
         """Override the default Equals behavior"""
@@ -90,7 +116,6 @@ class Contracts(object):
         contracts: a list of contract objects
         alphabet: a list of tuples containing the shared alphabet among all contracts
     """
-
     def __init__(self):
         """Initialize a contracts object"""
         self.contracts = OrderedDict()
@@ -133,10 +158,10 @@ class Contracts(object):
 
     def __str__(self):
         """Override the print behavior"""
-        astr = 'Contracts: \n'
+        astr = '{\n'
         for (name, _) in self.contracts.iteritems():
-            astr += name + '\n'
-        return astr
+            astr += '  ' + name + ',\n'
+        return astr + '}'
 
     def __eq__(self, other):
         """Override the default Equals behavior"""

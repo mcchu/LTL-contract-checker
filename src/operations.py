@@ -51,11 +51,11 @@ def composition(acontract, bcontract):
         A contract object that is the composition of the two inputs
     """
     comp = Contract()
-    comp.set_name(acontract.name + '_comp_' + bcontract.name)
-    comp.set_variables(_merge(acontract.variables, bcontract.variables))
-    comp.set_assumptions(_or(_and(acontract.get_assumptions(), bcontract.get_assumptions()),
-                             _inv(_and(acontract.get_guarantees(), bcontract.get_guarantees()))))
-    comp.set_guarantees(_and(acontract.get_guarantees(), bcontract.get_guarantees()))
+    comp.add_name(acontract.name + '_comp_' + bcontract.name)
+    comp.add_variables(_merge(acontract.variables, bcontract.variables))
+    comp.add_assumption(_or(_and(acontract.get_assumptions(), bcontract.get_assumptions()),
+                            _inv(_and(acontract.get_guarantees(), bcontract.get_guarantees()))))
+    comp.add_guarantee(_and(acontract.get_guarantees(), bcontract.get_guarantees()))
     return comp
 
 def conjunction(acontract, bcontract):
@@ -69,10 +69,10 @@ def conjunction(acontract, bcontract):
         A contract object that is the conjunction of the two inputs
     """
     conj = Contract()
-    conj.set_name(acontract.name + "_conj_" + bcontract.name)
-    conj.set_variables(_merge(acontract.variables, bcontract.variables))
-    conj.set_assumptions(_or(acontract.get_assumptions(), bcontract.get_assumptions()))
-    conj.set_guarantees(_and(acontract.get_guarantees(), bcontract.get_guarantees()))
+    conj.add_name(acontract.name + "_conj_" + bcontract.name)
+    conj.add_variables(_merge(acontract.variables, bcontract.variables))
+    conj.add_assumption(_or(acontract.get_assumptions(), bcontract.get_assumptions()))
+    conj.add_guarantee(_and(acontract.get_guarantees(), bcontract.get_guarantees()))
     return conj
 
 def _merge(alist, blist):
