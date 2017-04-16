@@ -39,8 +39,6 @@ def main():
     # parse system specification file
     contracts, checks = parse(spec_file)
 
-    print contracts
-
     # compile NuSMV file
     generate(contracts, checks, smv_file)
 

@@ -79,6 +79,14 @@ class Contract(object):
         guarantees = [guarantee + ' & ' for guarantee in self.guarantees]
         return '(' + ''.join(guarantees)[:-3] + ')'
 
+    def is_full(self):
+        """Check if contract parameters are filled
+
+        Returns:
+            A boolean indicating if the contracts parameters are not empty
+        """
+        return self.name and self.variables and self.assumptions and self.guarantees
+
     def saturate_guarantees(self):
         """Helper function that saturates each guarantee with contract assumptions"""
         assumptions = self.get_assumptions()

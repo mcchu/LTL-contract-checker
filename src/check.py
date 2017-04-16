@@ -38,7 +38,7 @@ class Check(object):
 
         Args:
             name: a string name of a contract
-        
+
         Returns:
             A contract object with the specified name
         """
