@@ -19,8 +19,10 @@ CONTRACT_NAME_HEADER = 'NAME'
 CONTRACT_VARIABLES_HEADER = 'VARIABLES'
 CONTRACT_ASSUMPTIONS_HEADER = 'ASSUMPTIONS'
 CONTRACT_GUARANTEES_HEADER = 'GUARANTEES'
-COMPATIBILITY_CHECK = 'COMPATIBILITY'
-CONSISTENCY_CHECK = 'CONSISTENCY'
+COMPATIBILITY_COMP_CHECK = 'COMPATIBILITY_COMP'
+COMPATIBILITY_CONJ_CHECK = 'COMPATIBILITY_CONJ'
+CONSISTENCY_COMP_CHECK = 'CONSISTENCY_COMP'
+CONSISTENCY_CONJ_CHECK = 'CONSISTENCY_CONJ'
 
 def parse(specfile):
     """Parses the system specification file and returns the contracts and checks
@@ -87,16 +89,17 @@ def parse(specfile):
                         check_type, check_contracts = line.split(')', 1)[0].split('(', 1)
                         check_contracts = [contracts.get_contract(
                             contract.strip()) for contract in check_contracts.split(',')]
-                        if COMPATIBILITY_CHECK in check_type.upper():
-                            compatibility = Compatibility()
-                            compatibility.set_contracts(check_contracts)
-                            checks.add_check(compatibility)
-                        elif CONSISTENCY_CHECK in check_type.upper():
-                            consistency = Consistency()
-                            consistency.set_contracts(check_contracts)
-                            checks.add_check(consistency)
+                        if COMPATIBILITY_COMP_CHECK in check_type.upper():
+                            check = Compatibility('composition', check_contracts)
+                        elif COMPATIBILITY_CONJ_CHECK in check_type.upper():
+                            check = Compatibility('conjunction', check_contracts)
+                        elif CONSISTENCY_COMP_CHECK in check_type.upper():
+                            check = Consistency('composition', check_contracts)
+                        elif CONSISTENCY_CONJ_CHECK in check_type.upper():
+                            check = Consistency('conjunction', check_contracts)
                         else: # (TODO) add error - unrecognized check
-                            continue
+                            pass
+                        checks.add_check(check)
                     else: # (TODO) add error - unexpected indentation
                         pass
 

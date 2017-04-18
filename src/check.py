@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Check module defines a check class that links contracts to a pre-defined check type"""
 from collections import OrderedDict
-from src.operations import compatibility, consistency
+import src.operations as ops
 
 class Check(object):
     """Check class is a base class for predefined check types
@@ -10,10 +10,13 @@ class Check(object):
         check_type: a string type associated with a check
         contracts: an ordered dictionary of contracts associated with a check
     """
-    def __init__(self):
+    def __init__(self, contracts=None):
         """Initialize a check object"""
         self.check_type = ''
-        self.contracts = OrderedDict()
+        if isinstance(contracts, list):
+            self.contracts = OrderedDict([(contract.name, contract) for contract in contracts])
+        else:
+            self.contracts = OrderedDict()
 
     def set_contracts(self, contracts):
         """Replaces all contracts in the check contracts attribute
@@ -66,17 +69,32 @@ class Compatibility(Check):
 
     Attributes:
         check_type: a string containing the compatibility check type
+        comp_type: a string containing the type of compatibility check
         contracts (inherited): an ordered dictionary of contracts associated with a check
     """
-    def __init__(self):
+    def __init__(self, comp_type='', contracts=None):
         """Initialize a compatibility check object"""
-        super(Compatibility, self).__init__()
+        super(Compatibility, self).__init__(contracts)
         self.check_type = 'compatibility'
+        self.comp_type = comp_type
 
     def get_ltl(self):
         """Returns the LTL statement for the compatibility of two contracts"""
         # (TODO) remove hard-coded contract parameters
-        return compatibility(self.contracts.values()[0], self.contracts.values()[1])
+        if self.comp_type == 'composition':
+            contract = ops.composition(self.contracts.values()[0], self.contracts.values()[1])
+        else:
+            contract = ops.conjunction(self.contracts.values()[0], self.contracts.values()[1])
+        return ops.compatibility(contract)
+
+    def __str__(self):
+        """Override the print behavior"""
+        astr = self.check_type + ': {\n'
+        astr += '  type : ' + self.comp_type + '\n'
+        astr += '  contracts: ['
+        for contract in self.contracts.values():
+            astr += contract.name + ', '
+        return astr[:-2] + ']\n}'
 
 class Consistency(Check):
     """Consistency is a subclass of check for the consistency check type
@@ -85,15 +103,29 @@ class Consistency(Check):
         check_type: a string containing the consistency check type
         contracts (inherited): an ordered dictionary of contracts associated with a check
     """
-    def __init__(self):
+    def __init__(self, cons_type='', contracts=None):
         """Initialize a consistency check object"""
-        super(Consistency, self).__init__()
+        super(Consistency, self).__init__(contracts)
         self.check_type = 'consistency'
+        self.cons_type = cons_type
 
     def get_ltl(self):
         """Returns the LTL statement for the consistency of two contracts"""
         # (TODO) remove hard-coded contract parameters
-        return consistency(self.contracts.values()[0], self.contracts.values()[1])
+        if self.cons_type == 'composition':
+            contract = ops.composition(self.contracts.values()[0], self.contracts.values()[1])
+        else:
+            contract = ops.conjunction(self.contracts.values()[0], self.contracts.values()[1])
+        return ops.consistency(contract)
+
+    def __str__(self):
+        """Override the print behavior"""
+        astr = self.check_type + ': {\n'
+        astr += '  type : ' + self.cons_type + '\n'
+        astr += '  contracts: ['
+        for contract in self.contracts.values():
+            astr += contract.name + ', '
+        return astr[:-2] + ']\n}'
 
 class Checks(object):
     """Checks is a class that stores all the check objects associated with a system

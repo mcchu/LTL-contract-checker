@@ -32,5 +32,5 @@ CONTRACT:
 		G(service -> X !request)
 
 CHECKS:
-	compatibility(waiter, customer)
-	consistency(waiter, customer)
+	COMPATIBILITY_COMP(waiter, customer)
+	CONSISTENCY_COMP(waiter, customer)
