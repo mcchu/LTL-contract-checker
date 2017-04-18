@@ -45,12 +45,12 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(test_contracts, contracts)
 
         # verify compatibility check
-        compatibility = Compatibility()
+        compatibility = Compatibility('composition')
         compatibility.set_contracts([waiter, customer])
         self.assertEqual(compatibility, checks.checks[0])
 
         # verify consistency check
-        consistency = Consistency()
+        consistency = Consistency('composition')
         consistency.set_contracts([waiter, customer])
         self.assertEqual(consistency, checks.checks[1])
 

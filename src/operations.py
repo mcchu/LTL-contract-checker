@@ -3,29 +3,27 @@
 
 from src.contract import Contract
 
-def compatibility(acontract, bcontract):
-    """Checks if acontract and bcontract are compatible
+def compatibility(contract):
+    """Checks the compatibility of a contract object
 
     Args:
-        acontract: a contract object
-        bcontract: a contract object
+        contract: a contract object
 
     Returns:
-        A string LTL expression that checks the compatibility of the inputs
+        A string LTL expression that checks the compatibility of the input
     """
-    return _ltl(composition(acontract, bcontract).get_assumptions())
+    return _ltl(contract.get_assumptions())
 
-def consistency(acontract, bcontract):
-    """Checks if acontract and bcontract are consistent
+def consistency(contract):
+    """Checks the consistency of a contract object
 
     Args:
-        acontract: a contract object
-        bcontract: a contract object
+        contract: a contract object
 
     Returns:
-        A string LTL expression that checks the consistency of the inputs
+        A string LTL expression that checks the consistency of the input
     """
-    return _ltl(composition(acontract, bcontract).get_guarantees())
+    return _ltl(contract.get_guarantees())
 
 def refinement(acontract, bcontract):
     """Checks if acontract refines bcontract
