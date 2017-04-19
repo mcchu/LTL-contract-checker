@@ -34,3 +34,4 @@ CONTRACT:
 CHECKS:
 	COMPATIBILITY_COMP(waiter, customer)
 	CONSISTENCY_COMP(waiter, customer)
+	REFINEMENT(waiter,customer)
