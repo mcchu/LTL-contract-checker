@@ -3,7 +3,7 @@
 
 import subprocess
 from src.contract import Contract, Contracts
-from src.check import Compatibility, Consistency, Checks
+from src.check import Compatibility, Consistency, Refinement, Checks
 
 # contract file attributes
 TAB_WIDTH = 2
@@ -23,6 +23,7 @@ COMPATIBILITY_COMP_CHECK = 'COMPATIBILITY_COMP'
 COMPATIBILITY_CONJ_CHECK = 'COMPATIBILITY_CONJ'
 CONSISTENCY_COMP_CHECK = 'CONSISTENCY_COMP'
 CONSISTENCY_CONJ_CHECK = 'CONSISTENCY_CONJ'
+REFINEMENT = 'REFINEMENT'
 
 def parse(specfile):
     """Parses the system specification file and returns the contracts and checks
@@ -97,6 +98,8 @@ def parse(specfile):
                             check = Consistency('composition', check_contracts)
                         elif CONSISTENCY_CONJ_CHECK in check_type.upper():
                             check = Consistency('conjunction', check_contracts)
+                        elif REFINEMENT in check_type.upper():
+                            check = Refinement(check_contracts)
                         else: # (TODO) add error - unrecognized check
                             pass
                         checks.add_check(check)
@@ -182,11 +185,14 @@ def run(smvfile, checks):
 
     for x in range(result_num + 1):
         print "Result of checking:", checks.checks[x]
-        print 'Statement is', results[x]
-        print 'Example:'
-        for y in counterexamples[x]:
-            print y
-        print ''
+        if checks.checks[x].check_type == 'refinement':
+            print 'Statement is', not results[x]
+        else:    
+            print 'Statement is', results[x]
+            print 'Example:'
+            for y in counterexamples[x]:
+                print y
+            print ''
 
 def _clean_line(line):
     """Returns a comment-free, tab-replaced line with no whitespace and the number of tabs"""

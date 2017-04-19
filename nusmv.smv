@@ -8,3 +8,4 @@ ASSIGN
 
 	LTLSPEC !((((TRUE) & (TRUE)) | !((((TRUE) -> G(!request -> X !service)) & ((TRUE) -> G(request -> X service))) & (((TRUE) -> (F request)) & ((TRUE) -> G((request & !service) -> X request)) & ((TRUE) -> G(service -> X !request))))));
 	LTLSPEC !(((((TRUE) -> G(!request -> X !service)) & ((TRUE) -> G(request -> X service))) & (((TRUE) -> (F request)) & ((TRUE) -> G((request & !service) -> X request)) & ((TRUE) -> G(service -> X !request)))));
+	LTLSPEC (((TRUE) -> (TRUE)) & ((((TRUE) -> G(!request -> X !service)) & ((TRUE) -> G(request -> X service))) -> (((TRUE) -> (F request)) & ((TRUE) -> G((request & !service) -> X request)) & ((TRUE) -> G(service -> X !request)))));

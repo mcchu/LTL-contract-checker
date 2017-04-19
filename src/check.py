@@ -127,6 +127,28 @@ class Consistency(Check):
             astr += contract.name + ', '
         return astr[:-2] + ']\n}'
 
+class Refinement(Check):
+    """Refinement is a subclass of check for the refinement check type
+
+    """
+    def __init__(self, contracts=None):
+        """Initialize a refinement check object"""
+        super(Refinement, self).__init__(contracts)
+        self.check_type = 'refinement'
+
+    def get_ltl(self):
+        """Returns the LTL statement to check if contract_a refines contract_b"""
+        # (TODO) remove hard-coded contract parameters
+        return ops.refinement(self.contracts.values()[0], self.contracts.values()[1])
+
+    def __str__(self):
+        """Override the print behavior"""
+        astr = self.check_type + ': {\n'
+        astr += '  contracts: ['
+        for contract in self.contracts.values():
+            astr += contract.name + ', '
+        return astr[:-2] + ']\n}'
+
 class Checks(object):
     """Checks is a class that stores all the check objects associated with a system
 

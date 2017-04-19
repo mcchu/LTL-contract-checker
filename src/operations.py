@@ -12,7 +12,7 @@ def compatibility(contract):
     Returns:
         A string LTL expression that checks the compatibility of the input
     """
-    return _ltl(contract.get_assumptions())
+    return _ltl_inv(contract.get_assumptions())
 
 def consistency(contract):
     """Checks the consistency of a contract object
@@ -23,7 +23,7 @@ def consistency(contract):
     Returns:
         A string LTL expression that checks the consistency of the input
     """
-    return _ltl(contract.get_guarantees())
+    return _ltl_inv(contract.get_guarantees())
 
 def refinement(acontract, bcontract):
     """Checks if acontract refines bcontract
@@ -78,6 +78,10 @@ def _merge(alist, blist):
     return list(set(alist) | set(blist))
 
 def _ltl(astr):
+    """Applies an inverted LTLSPEC wrapper to the input string"""
+    return '\tLTLSPEC ' + astr + ';\n'
+
+def _ltl_inv(astr):
     """Applies an inverted LTLSPEC wrapper to the input string"""
     return '\tLTLSPEC !' + astr + ';\n'
 
