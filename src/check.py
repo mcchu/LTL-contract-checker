@@ -80,11 +80,11 @@ class Compatibility(Check):
 
     def get_ltl(self):
         """Returns the LTL statement for the compatibility of two contracts"""
-        # (TODO) remove hard-coded contract parameters
+        # (DONE) remove hard-coded contract parameters
         if self.comp_type == 'composition':
-            contract = ops.composition(self.contracts.values()[0], self.contracts.values()[1])
+			contract = ops.composition(self.contracts.values())
         else:
-            contract = ops.conjunction(self.contracts.values()[0], self.contracts.values()[1])
+			contract = ops.conjunction(self.contracts.values())
         return ops.compatibility(contract)
 
     def __str__(self):
@@ -111,11 +111,11 @@ class Consistency(Check):
 
     def get_ltl(self):
         """Returns the LTL statement for the consistency of two contracts"""
-        # (TODO) remove hard-coded contract parameters
+        # (DONE) remove hard-coded contract parameters
         if self.cons_type == 'composition':
-            contract = ops.composition(self.contracts.values()[0], self.contracts.values()[1])
+			contract = ops.composition(self.contracts.values())
         else:
-            contract = ops.conjunction(self.contracts.values()[0], self.contracts.values()[1])
+		    contract = ops.conjunction(self.contracts.values())
         return ops.consistency(contract)
 
     def __str__(self):

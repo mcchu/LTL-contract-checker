@@ -38,40 +38,48 @@ def refinement(acontract, bcontract):
     return _ltl(_and(_imply(bcontract.get_assumptions(), acontract.get_assumptions()),
                      _imply(acontract.get_guarantees(), bcontract.get_guarantees())))
 
-def composition(acontract, bcontract):
-    """Takes the composition of two contracts
+def composition(contracts):    
+    """Takes the composition of a list of contracts
 
     Args:
-        acontract: a contract object
-        bcontract: a contract object
+        contract: a list of contract objects
 
     Returns:
-        A contract object that is the composition of the two inputs
-    """
-    comp = Contract()
-    comp.add_name(acontract.name + '_comp_' + bcontract.name)
-    comp.add_variables(_merge(acontract.variables, bcontract.variables))
-    comp.add_assumption(_or(_and(acontract.get_assumptions(), bcontract.get_assumptions()),
-                            _inv(_and(acontract.get_guarantees(), bcontract.get_guarantees()))))
-    comp.add_guarantee(_and(acontract.get_guarantees(), bcontract.get_guarantees()))
-    return comp
+        A contract object that is the composition of whole list
+    """ 
+    if(len(contracts) == 1):
+        return contracts[0]
+    else:
+        comp = Contract()
+        comp.add_name(contracts[0].name + '_comp_' + contracts[1].name)
+        comp.add_variables(_merge(contracts[0].variables, contracts[1].variables))
+        comp.add_assumption(_or(_and(contracts[0].get_assumptions(), contracts[1].get_assumptions()),
+                            _inv(_and(contracts[0].get_guarantees(), contracts[1].get_guarantees()))))
+        comp.add_guarantee(_and(contracts[0].get_guarantees(), contracts[1].get_guarantees()))
+        contracts.pop(0) #remove first element in list
+        contracts[0] = comp #replace "new" first element with conj
+        return composition(contracts)
 
-def conjunction(acontract, bcontract):
-    """Takes the conjunction of two contracts
+def conjunction(contracts):
+    """Takes the conjunction of a list of contracts
 
     Args:
-        acontract: a contract object
-        bcontract: a contract object
+        contract: a list of contract objects
 
     Returns:
-        A contract object that is the conjunction of the two inputs
-    """
-    conj = Contract()
-    conj.add_name(acontract.name + "_conj_" + bcontract.name)
-    conj.add_variables(_merge(acontract.variables, bcontract.variables))
-    conj.add_assumption(_or(acontract.get_assumptions(), bcontract.get_assumptions()))
-    conj.add_guarantee(_and(acontract.get_guarantees(), bcontract.get_guarantees()))
-    return conj
+        A contract object that is the conjunction of whole list
+    """ 
+    if(len(contracts) == 1):
+        return contracts[0]
+    else:
+        conj = Contract()
+        conj.add_name(contracts[0].name + "_conj_" + contracts[1].name)
+        conj.add_variables(_merge(contracts[0].variables, contracts[1].variables))
+        conj.add_assumption(_or(contracts[0].get_assumptions(), contracts[1].get_assumptions()))
+        conj.add_guarantee(_and(contracts[0].get_guarantees(), contracts[1].get_guarantees()))		
+        contracts.pop(0) #remove first element in list
+        contracts[0] = conj #replace "new" first element with conj
+        return conjunction(contracts)
 
 def _merge(alist, blist):
     """Merges input lists and removes duplicates"""
