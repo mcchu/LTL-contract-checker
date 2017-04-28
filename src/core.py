@@ -91,7 +91,7 @@ def parse(specfile):
                         check_contracts = [contracts.get_contract(
                             contract.strip()) for contract in check_contracts.split(',')]
                         if COMPATIBILITY_COMP_CHECK in check_type.upper():
-                            check = Compatibility('composition', check_contracts)
+						    check = Compatibility('composition', check_contracts)
                         elif COMPATIBILITY_CONJ_CHECK in check_type.upper():
                             check = Compatibility('conjunction', check_contracts)
                         elif CONSISTENCY_COMP_CHECK in check_type.upper():
@@ -106,7 +106,7 @@ def parse(specfile):
                     else: # (TODO) add error - unexpected indentation
                         pass
 
-    return contracts, checks
+    return contracts, checks	
 
 def generate(contracts, checks, smvfile):
     """Generates a NuSMV file with configured variable declarations and LTL checks
@@ -138,6 +138,9 @@ def generate(contracts, checks, smvfile):
 
 def run(smvfile, checks):
     """runs the set of contracts and checks through NuSMV and parses the results to return to the user"""
+
+	# Initialize output file to write NuSMV results to
+    #outfile = open('nusmv.out' , 'w')
 
     # Initialize an array to hold the results of the checks
     results = []
@@ -185,14 +188,23 @@ def run(smvfile, checks):
 
     for x in range(result_num + 1):
         print "Result of checking:", checks.checks[x]
+    #    outfile.write("Result of checking: ")
+    #    outfile.write(checks.checks[x])
         if checks.checks[x].check_type == 'refinement':
             print 'Statement is', not results[x]
+     #       outfile.write('Statement is')
+     #       outfile.write(not results[x])
         else:    
             print 'Statement is', results[x]
             print 'Example:'
+      #      outfile.write ('Statement is ')
+      #      outfile.write (results[x])
+      #      outfile.write ('Example:')
             for y in counterexamples[x]:
                 print y
+       #         outfile.write(y)
             print ''
+        #    outfile.write('\n')
 
 def _clean_line(line):
     """Returns a comment-free, tab-replaced line with no whitespace and the number of tabs"""
