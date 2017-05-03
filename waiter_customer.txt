@@ -8,10 +8,10 @@
 
 CONTRACT:
 	NAME:
-    waiter
-  VARIABLES:
-    request := FALSE
-    service := FALSE
+		waiter
+	VARIABLES:
+		request := FALSE
+		service := FALSE
 	ASSUMPTIONS:
 		TRUE
 	GUARANTEES:
@@ -20,10 +20,10 @@ CONTRACT:
 
 CONTRACT:
 	NAME: 
-	  customer
-  VARIABLES:
-    request := FALSE
-    service := FALSE
+		customer
+	VARIABLES:
+		request := FALSE
+		service := FALSE
 	ASSUMPTIONS:
 		TRUE
 	GUARANTEES:

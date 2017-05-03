@@ -189,10 +189,11 @@ def run(smvfile, checks):
             print 'Statement is', not results[x]
         else:    
             print 'Statement is', results[x]
-            print 'Example:'
-            for y in counterexamples[x]:
-                print y
-            print ''
+            if results[x] == True:
+                print 'Example:'
+                for y in counterexamples[x]:
+                    print y
+                print ''
 
 def _clean_line(line):
     """Returns a comment-free, tab-replaced line with no whitespace and the number of tabs"""
