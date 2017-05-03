@@ -1,18 +1,11 @@
 MODULE main
 VAR
-	train_moving: boolean;
-	train_in_station: boolean;
-	door_opening: boolean;
-	train_exits: boolean;
-	train_enters: boolean;
-	door_open: boolean;
+	service: boolean;
+	request: boolean;
 ASSIGN
-	init(train_moving) := TRUE;
-	init(train_in_station) := FALSE;
-	init(door_opening) := FALSE;
-	init(train_exits) := FALSE;
-	init(train_enters) := TRUE;
-	init(door_open) := FALSE;
+	init(service) := FALSE;
+	init(request) := FALSE;
 
-	LTLSPEC !(TRUE);
-	LTLSPEC !(((TRUE) -> G(train_enters -> X door_opening)) & ((TRUE) -> G(door_open -> !train_moving)) & ((TRUE) -> G(train_moving -> !door_opening)) & ((TRUE) -> G(door_opening -> X door_open)) & ((TRUE) -> G(train_enters -> train_moving)) & ((TRUE) -> G(train_exits -> train_moving)) & ((TRUE) -> G(train_enters -> X train_in_station)) & ((TRUE) -> G(train_exits -> X !train_in_station)) & ((TRUE) -> G(train_in_station -> !train_moving)) & ((TRUE) -> G(!train_in_station -> train_moving)) & ((TRUE) -> G((train_in_station & !train_exits) -> X train_in_station)) & ((TRUE) -> F(train_exits)));
+	LTLSPEC !((((TRUE) & (TRUE)) | !((((TRUE) -> G(!request -> X !service)) & ((TRUE) -> G(request -> X service))) & (((TRUE) -> (F request)) & ((TRUE) -> G((request & !service) -> X request)) & ((TRUE) -> G(service -> X !request))))));
+	LTLSPEC !(((((TRUE) -> G(!request -> X !service)) & ((TRUE) -> G(request -> X service))) & (((TRUE) -> (F request)) & ((TRUE) -> G((request & !service) -> X request)) & ((TRUE) -> G(service -> X !request)))));
+	LTLSPEC (((TRUE) -> (TRUE)) & ((((TRUE) -> G(!request -> X !service)) & ((TRUE) -> G(request -> X service))) -> (((TRUE) -> G(!request -> X !service)) & ((TRUE) -> G(request -> (X service) | (X X service))))));

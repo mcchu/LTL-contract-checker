@@ -34,7 +34,7 @@ CONTRACT:
 		G(train_in_station -> !train_moving)
 		G(!train_in_station -> train_moving)
 		G((train_in_station & !train_exits) -> X train_in_station)
-		F(train_exits)
+
 CHECKS:
 	COMPATIBILITY_COMP(train)
 	CONSISTENCY_COMP(train)
