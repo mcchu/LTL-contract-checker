@@ -44,6 +44,6 @@ CONTRACT:
 		G(service -> X !request)
 
 CHECKS:
-	COMPATIBILITY_COMP(waiter1, customer)
-	CONSISTENCY_COMP(waiter1, customer)
+	COMPATIBILITY_COMP(waiter2, customer)
+	CONSISTENCY_COMP(waiter2, customer)
 	REFINEMENT(waiter1,waiter2)
