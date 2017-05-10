@@ -1,10 +1,9 @@
 ## COMMENTS
-##
-## Contract 1 represents the Waiter, contract 2 represents the Customer
+##   Waiter-Customer model
 ##
 ## Variable Definitions:
-## request - the customer has requested service
-## service - the waiter is servicing the customer
+##   request - the customer has requested service
+##   service - the waiter is servicing the customer
 
 CONTRACT:
 	NAME:

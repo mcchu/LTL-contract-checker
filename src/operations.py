@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Operations module provides LTL operations to test contracts"""
 
-from src.contract import Contract
+import contract
 
 def compatibility(contract):
     """Checks the compatibility of a contract object
@@ -38,19 +38,27 @@ def refinement(acontract, bcontract):
     return _ltl(_and(_imply(bcontract.get_assumptions(), acontract.get_assumptions()),
                      _imply(acontract.get_guarantees(), bcontract.get_guarantees())))
 
-def composition(contracts):    
-    """Takes the composition of a list of contracts
+def saturation(contract):
+    """Perform a saturation operation on a contract
 
     Args:
-        contract: a list of contract objects
+        contract: an unsaturated contract object
+    """
+    contract.guarantees = [_imply(contract.get_assumptions(), g) for g in contract.guarantees]
+
+def composition(contracts):
+    """Perform a composition operation on a list of contracts
+
+    Args:
+        contracts: a list of contract objects
 
     Returns:
         A contract object that is the composition of whole list
-    """ 
-    if(len(contracts) == 1):
+    """
+    if len(contracts) == 1:
         return contracts[0]
     else:
-        comp = Contract()
+        comp = contract.Contract()
         comp.add_name(contracts[0].name + '_comp_' + contracts[1].name)
         comp.add_variables(_merge(contracts[0].variables, contracts[1].variables))
         comp.add_assumption(_or(_and(contracts[0].get_assumptions(), contracts[1].get_assumptions()),
@@ -64,19 +72,19 @@ def conjunction(contracts):
     """Takes the conjunction of a list of contracts
 
     Args:
-        contract: a list of contract objects
+        contracts: a list of contract objects
 
     Returns:
         A contract object that is the conjunction of whole list
-    """ 
-    if(len(contracts) == 1):
+    """
+    if len(contracts) == 1:
         return contracts[0]
     else:
-        conj = Contract()
+        conj = contract.Contract()
         conj.add_name(contracts[0].name + "_conj_" + contracts[1].name)
         conj.add_variables(_merge(contracts[0].variables, contracts[1].variables))
         conj.add_assumption(_or(contracts[0].get_assumptions(), contracts[1].get_assumptions()))
-        conj.add_guarantee(_and(contracts[0].get_guarantees(), contracts[1].get_guarantees()))		
+        conj.add_guarantee(_and(contracts[0].get_guarantees(), contracts[1].get_guarantees()))
         contracts.pop(0) #remove first element in list
         contracts[0] = conj #replace "new" first element with conj
         return conjunction(contracts)
