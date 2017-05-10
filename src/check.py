@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Check module defines a check class that links contracts to a pre-defined check type"""
 from collections import OrderedDict
-import src.operations as ops
+import operations as ops
 
 class Check(object):
     """Check class is a base class for predefined check types

@@ -1,0 +1,42 @@
+## COMMENTS
+##   Train door controller model
+##
+## Variable Definitions:
+##   train_enters - train entering the station
+##   train_leaves - train exiting the station
+##   train_moving - train moving 
+##   train_in_station - the train is in a station
+##   door_opening - the doors of the train are opening
+##   door_open - the doors of the train are open
+##   door_closing - the doors of the train are closing
+
+CONTRACT:
+  NAME:
+    train_door
+  VARIABLES:
+    train_enters := TRUE
+    train_leaves := FALSE
+    train_moving := TRUE
+    train_in_station := FALSE
+    door_opening := FALSE
+    door_open := FALSE
+    door_closing := FALSE ## ADDED
+  ASSUMPTIONS:
+    TRUE
+  GUARANTEES:
+    ## ORIGINAL CONSTRAINTS
+    G(train_enters -> X door_opening)
+    G(door_open -> !train_moving)
+    G(train_moving -> !door_opening)
+    G(door_opening -> X door_open)
+    G(train_enters -> X train_in_station)
+    G(train_leaves -> X !train_in_station)
+
+    ## ADDED TRAIN CONSTRAINTS
+    G(door_closing -> X train_leaves)
+    G(train_in_station & (door_opening | door_open | door_closing) -> X train_in_station)
+    G(train_leaves | train_enters -> train_moving)
+    G(door_open -> X door_closing)
+
+CHECKS:
+  CONSISTENCY_COMP(train_door)

@@ -3,7 +3,7 @@
 
 import sys
 import getopt
-from src.core import parse, generate, run
+from core import parse, generate, run
 
 def main():
     """Parses command line arguments and runs the LTL contract checker tool"""

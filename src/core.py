@@ -2,8 +2,8 @@
 """Core module defines the core workflow functions of the LTL contract checker tool"""
 
 import subprocess
-from src.contract import Contract, Contracts
-from src.check import Compatibility, Consistency, Refinement, Checks
+from contract import Contract, Contracts
+from check import Compatibility, Consistency, Refinement, Checks
 
 # contract file attributes
 TAB_WIDTH = 2
